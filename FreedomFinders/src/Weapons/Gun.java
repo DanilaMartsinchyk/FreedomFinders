@@ -1,4 +1,4 @@
-package Weapons;
+package Weapon;
 
 import processing.core.PApplet;
 import processing.core.PImage;
