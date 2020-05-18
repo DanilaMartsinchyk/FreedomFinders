@@ -25,6 +25,15 @@ public class Player extends Sprite {
 	private int maxHealth;
 	PImage [] image;
 	DrawingSurface d = new DrawingSurface();
+
+	/**
+         * creates an obstacle object
+         * @param i image of the obstacle
+         * @param x top left x coordinate of the object
+         * @param y top left y coordinate of the object
+         * @param w width of the object
+         * @param h height of the object
+         **/
 	public Player(PImage[] i, int x, int y) {
 		super(i,x,y,STICK_FIGURE_LENGTH,STICK_FIGURE_HEIGHT);
 		jumps = 0;
@@ -36,6 +45,10 @@ public class Player extends Sprite {
 	}
 	
 	
+	/**
+	 * Method which allows the player object to jump
+         * @param acc the acceleration at which the player jumps at
+	 **/
 	public void jump(int acc) {
 		if(canJump){
 			accelerate(0,-acc);
@@ -46,6 +59,11 @@ public class Player extends Sprite {
 			canJump = false;
 		}
 	}
+
+	/**
+	 * Makes the current player object fall
+	 * @amount the amount the player falls 
+         **/
 	public void fall(float amount) {
 		if(this.y <120) {
 			setVelocity(0,0);
@@ -57,15 +75,35 @@ public class Player extends Sprite {
 		}
 	
 	}
+
+	/**
+	 * Decreases the health by the parameter, health
+	 * @param health the amount of health to be decreased
+	 **/
 	public void decreaseHealth(int health) {
 		this.health -= health;
 	}
+
+	/**
+	 * Sets the health of the player to the health in the parameter
+	 * @param health The new health of the player
+	 **/
 	public void setHealth(int health) {
 		this.health = health;
 	}
+
+	/**
+	 * Gets the health of the player
+	 * @return returns the health of the currentPlayer
+	 **/
 	public int getHealth() {
 		return health;
 	}
+
+	/**
+	 * Draws the player
+	 * @param drawer the PApplet object used to draw the player
+	 **/
 	public void draw(PApplet drawer) {
 		a++;
 		drawer.image(image[a% image.length], (int) x, (int) y, (int) width, (int) height);
