@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import CollisionDetection.CollisionDetection;
 import Obstacles.Obstacles;
 import Players.Player;
-import Weapon.*;
+import Weapons.*;
 import processing.core.PApplet;
 import processing.core.PImage;
 import states.GameOverScreen;

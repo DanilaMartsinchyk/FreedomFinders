@@ -2,7 +2,7 @@ package CollisionDetection;
 
 import Obstacles.Obstacles;
 import Players.Player;
-import Weapon.Bullet;
+import Weapons.Bullet;
 
 public class CollisionDetection {
 	public CollisionDetection() {
