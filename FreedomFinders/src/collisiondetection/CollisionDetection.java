@@ -57,4 +57,38 @@ public class CollisionDetection {
 		}
 		return false;
 	}
+	/**
+	 * checks if the player got hit by a bullet
+	 * @param the enemy bullet
+	 * @param p the main player
+	 * @return true if the bullet touches the player
+	 */
+	public boolean playerBulletCollision(Bullet b, Player p) {
+		double bWidth = (b.getWidth() - 5)/ 2;
+		double bHeight = (b.getHeight() - 0)/2;
+		double pWidth = (p.getWidth() - 5) / 2;
+		double pHeight = (p.getHeight() - 5) /2;
+		double distanceX = (b.getX() + bWidth) - (p.getX() + pWidth);
+		double distanceY = (b.getY() + bHeight) - (p.getY() + pHeight );
+		double combinedHalfW =bWidth + pWidth;
+		double combinedHalfH = bHeight + pHeight;
+		
+		if(Math.abs(distanceX) < combinedHalfW) {
+			if(Math.abs(distanceY) < combinedHalfH) {
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * checks if the enemy John gets hit by a bullet
+	 * @param b players bullet
+	 * @return true if it does hit him false if it does not
+	 */
+	public boolean johnBulletCollision(Bullet b) {
+		if(b.getX() >= 150 && b.getY() < 225 && b.getY() > 115) {
+			return true;
+		}
+		return false;
+	}
 }
