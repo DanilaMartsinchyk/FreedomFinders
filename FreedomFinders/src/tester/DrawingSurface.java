@@ -20,6 +20,7 @@ import enemy.PatrolManJohn;
 import processing.core.PApplet;
 import processing.core.PImage;
 import states.GameOverScreen;
+import states.MenuScreen;
 import states.WinnerScreen;
 import javax.swing.*;
 import sun.audio.*;
@@ -81,13 +82,14 @@ public class DrawingSurface extends PApplet  {
 	private int johnX;
 	private int johnHeadX;
 	private int bossX;
+	MenuScreen menu = new MenuScreen();
 	boolean firstShot;
 
 	
 	public static enum STATE{
-		Normal,Boss,GameOver,Winner
+		Menu,Normal,Boss,GameOver,Winner
 	};
-	public static STATE State = STATE.Normal;
+	public static STATE State = STATE.Menu;
 	/**
 	 * creates a drawing surface object
 	 */
@@ -292,6 +294,9 @@ public class DrawingSurface extends PApplet  {
 			 }
 			
 		 } 
+		 if(keyCode == 'E' && State == State.Menu) {
+			 State = State.Normal;
+		 }
 		 if(keyCode == 'E' && State == STATE.GameOver) {
 			 	player.setHealth(100);
 			 	score = 0;
@@ -364,6 +369,28 @@ public class DrawingSurface extends PApplet  {
 		scale(ratioX,ratioY);
 		if(player.getHealth() <= 0) {
 			State = STATE.GameOver;
+		}
+		if(State == State.Menu) {
+			image(theBackground,backgroundX,backgroundY,150,200);
+			image(theBackground2,background2X,backgroundY,150,202);
+		    image(theBackground3,background3X,backgroundY ,150,200);
+			backgroundX -= 1;
+			background2X -=1;
+			background3X -= 1;
+			if(background3X < 110 && a && d) {
+				backgroundX = 240;
+				a = false;
+				d = false;
+			}
+			if(background3X  < -40 && a == false) {
+				background2X = 238;
+				a = true;
+			}
+			if(background3X < -190 && a && d == false) {
+				background3X = 238;
+			d = true;
+			}
+			menu.draw(this);
 		}
 		if(State == STATE.Normal) {
 			
