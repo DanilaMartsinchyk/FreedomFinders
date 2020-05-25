@@ -16,7 +16,7 @@ import CollisionDetection.CollisionDetection;
 import Obstacles.Obstacles;
 import Players.Player;
 import Weapons.*;
-import Weapon.*;
+import Weapons.*;
 import enemy.PatrolManJohn;
 import processing.core.PApplet;
 import processing.core.PImage;
