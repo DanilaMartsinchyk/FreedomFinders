@@ -15,7 +15,12 @@ import java.util.ArrayList;
 import CollisionDetection.CollisionDetection;
 import Obstacles.Obstacles;
 import Players.Player;
+
+import Weapons.*;
+import Weapons.*;
+
 import Weapon.*;
+
 import enemy.PatrolManJohn;
 import processing.core.PApplet;
 import processing.core.PImage;
