@@ -15,13 +15,22 @@ import java.util.ArrayList;
 import CollisionDetection.CollisionDetection;
 import Obstacles.Obstacles;
 import Players.Player;
+
 import Weapons.*;
 import Weapons.*;
+
+import Weapon.*;
+
 import enemy.PatrolManJohn;
 import processing.core.PApplet;
 import processing.core.PImage;
 import states.GameOverScreen;
 import states.WinnerScreen;
+import javax.swing.*;
+import sun.audio.*;
+import java.io.*;
+
+
 
 public class DrawingSurface extends PApplet  {
 
@@ -35,12 +44,12 @@ public class DrawingSurface extends PApplet  {
 	private PImage [] standing;
 	private PImage [] gliding;
 	private PImage[] patrolManJohn;
-	private PImage guard;
 	private PImage johnsHead;
 	private PImage[] john;
 	private int count = 0;
-	private PImage trash;
-	private PImage crate;
+	private PImage[] trash;
+	private PImage[] crate;
+	private PImage[] guard;
 	private PImage gun;
 	private PImage bullet;
 	private Gun weapon;
@@ -70,6 +79,15 @@ public class DrawingSurface extends PApplet  {
 	private int prevBossHealth;
 	private WinnerScreen w;
 	private boolean glidingCondition;
+	private ArrayList<Obstacles> obstaclesSet1 = new ArrayList<Obstacles>();
+	private ArrayList<Obstacles> obstaclesSet2 = new ArrayList<Obstacles>();
+	private ArrayList<Obstacles> obstaclesSet3 = new ArrayList<Obstacles>();
+	private PImage[] sawblade;
+	private int johnX;
+	private int johnHeadX;
+	private int bossX;
+	boolean firstShot;
+
 	
 	public static enum STATE{
 		Normal,Boss,GameOver,Winner
@@ -87,6 +105,10 @@ public class DrawingSurface extends PApplet  {
 		john = new PImage[21];
 		patrolManJohn = new PImage[11];
 		background = new PImage[20];
+		sawblade = new PImage[5];
+		trash = new PImage[1];
+		crate = new PImage[1];
+		guard = new PImage[1];
 		obstacles = new ArrayList<Obstacles>();
 		count = 0;
 		score = 0;
@@ -102,7 +124,11 @@ public class DrawingSurface extends PApplet  {
 		d = true;
 		prevHealth = 0;
 		prevBossHealth = 100;
+		johnX = 325;
+		johnHeadX = 355;
 		glidingCondition = false;
+		bossX = 280;
+		firstShot = false;
 	}
 
 	/**
@@ -123,12 +149,13 @@ public class DrawingSurface extends PApplet  {
 	/**
 	 * spawns patrolman John
 	 */
-	public void spawnNewPatrolManJohn() {
+	public PatrolManJohn spawnNewPatrolManJohn() {
 		if(boss1!= null) {
 			prevBossHealth = boss1.getHealth();
 		}
-		boss1 = new PatrolManJohn(patrolManJohn,120,130);
+		boss1 = new PatrolManJohn(patrolManJohn,bossX,130);
 		boss1.setHealth(prevBossHealth);
+		return boss1;
 	}
 	/**
 	 * returns a player thats jumping
@@ -194,6 +221,10 @@ public class DrawingSurface extends PApplet  {
 		Obstacles o = new Obstacles(guard,x,y,40,60);
 		return o;
 	}
+	public Obstacles sawblade(int x, int y) {
+		Obstacles o = new Obstacles(sawblade,x,y,40,60);
+		return o;
+	}
 	public int getScore() {
 		return score;
 	}
@@ -215,15 +246,18 @@ public class DrawingSurface extends PApplet  {
 		for(int i = 0; i < background.length; i++) {
 			background[i] = loadImage("BackgroundGIF/Background" + i + ".gif");
 		}
-		trash = loadImage("Trash.png");
-		crate = loadImage("Crate.png");
+		for(int i = 0; i < sawblade.length; i++) {
+			sawblade[i] = loadImage("Sawblade/Sawblade" + i + ".gif");
+		}
+		trash[0] = loadImage("Trash.png");
+		crate[0] = loadImage("Crate.png");
 		gun = loadImage("Gun.png");
 		bullet = loadImage("Bullet.png");
 		jumping[0] = loadImage("RunGif/Run2.gif");
 		standing[0] = loadImage("StickFigure.png");
 		gliding[0] = loadImage("Gliding.png");
 		johnsHead = loadImage("Head.png");
-		guard = loadImage("Guard.png");
+		guard[0] = loadImage("Guard.png");
 		spawnNewPlayer();
 		theBackground = loadImage("background.png");
 		theBackground2 = loadImage("background2.png");
@@ -233,6 +267,15 @@ public class DrawingSurface extends PApplet  {
 		obstacles.add(crate(350,130));
 		obstacles.add(guard(400,130));
 		
+		obstaclesSet1.add(trashCan(250,130));
+		obstaclesSet1.add(trashCan(280,130));
+		obstaclesSet1.add(trashCan(310,130));
+		obstaclesSet1.add(trashCan(340,130));
+		obstaclesSet2.add(crate(500,130));
+		obstaclesSet2.add(sawblade(500,0));
+		obstaclesSet3.add(crate(1250,130));
+		obstaclesSet3.add(guard(1290,130));
+		playMusic("BackgroundMusic.wav");
 	}
 	public void keyPressed() {
 		
@@ -257,13 +300,33 @@ public class DrawingSurface extends PApplet  {
 		 if(keyCode == 'E' && State == STATE.GameOver) {
 			 	player.setHealth(100);
 			 	score = 0;
+			 	for(int j = 0; j < obstaclesSet1.size(); j++) {
+					obstaclesSet1.set(j, trashCan(250 + j * 30, 130));
+				}
+			 	obstaclesSet2.set(0, crate(500,130));
+				obstaclesSet2.set(1, sawblade(500,0));
+				obstaclesSet3.set(0, crate(1250,130));
+				obstaclesSet3.set(1,guard(1290,130));
 				State = STATE.Normal;
-				obstacles.set(2, guard(450,130));
-				obstacles.set(0, trashCan(350,130));
-				obstacles.set(1, crate(400,130));
+			
 			}
+		if(keyCode == 'E' && State == STATE.Winner) {
+			score += 5;
+		 	for(int j = 0; j < obstaclesSet1.size(); j++) {
+				obstaclesSet1.set(j, trashCan(250 + j * 30, 130));
+			}
+		 	obstaclesSet2.set(0, crate(500,130));
+			obstaclesSet2.set(1, sawblade(500,0));
+			obstaclesSet3.set(0, crate(1250,130));
+			obstaclesSet3.set(1,guard(1290,130));
+			State = STATE.Normal;
+		}
 		 if(keyCode == 32) {
 			 gunCondition = true;
+			 if(b.getX() < 190) {
+				 playMusic("GunFire.wav");
+			 }
+			
 			 System.out.println(background3X);
 		 }
 		 
@@ -281,43 +344,80 @@ public class DrawingSurface extends PApplet  {
 	
 			
 	}
+	public void playMusic(String filepath) {
+		InputStream music;
+		try {
+			music = new FileInputStream(new File(filepath));
+			AudioStream audios = new AudioStream(music);
+			AudioPlayer.player.start(audios);
+		}
+		catch(Exception e) {
+			System.out.println("Pepega");
+		}
+	}
 	
 
 	public void draw() {
 		if(player.getY() >= 118	) {
 			count = 0;
 		 }
-		weapon = gun((int)player.getX() + 43,(int)player.getY() + 5);
+		weapon = gun((int)player.getX() + 50,(int)player.getY() + 5);
 		background(255,255,255);   
 		pushMatrix();
-		float ratioX = (float)width/WIDTH * 3;
-		float ratioY = (float)height/HEIGHT * 3;
+		float ratioX = (float)width/WIDTH * 3.4f;
+		float ratioY = (float)height/HEIGHT * 3.2f;
 		scale(ratioX,ratioY);
 		if(player.getHealth() <= 0) {
 			State = STATE.GameOver;
 		}
-		if(score/5 >= 350) {
-			State = STATE.Boss;
-		}
 		if(State == STATE.Normal) {
-			if(c.obstacleCollision(player, obstacles.get(0))) {
-				player.decreaseHealth(45);
-				obstacles.set(0, trashCan(500,130));
+			
+			//System.out.println(frameRate);
+			for(int i = 0; i < obstaclesSet1.size(); i++) {
+				if(c.obstacleCollision(player,obstaclesSet1.get(i))) {
+					player.decreaseHealth(45);
+					obstaclesSet1.set(i, trashCan(15000,15000));
+				}
 			}
-			if(c.obstacleCollision(player,obstacles.get(1))) {
-				player.decreaseHealth(45);
-				obstacles.set(1, crate(600,130));
+			for(int i = 0; i < obstaclesSet1.size(); i++) {
+				if(obstaclesSet1.get(i).getX() < - 415) {
+					for(int j = 0; j < obstaclesSet1.size(); j++) {
+						obstaclesSet1.set(j, trashCan(250 + j * 30, 130));
+					}
+				}
 			}
-			if(c.obstacleCollision(player,obstacles.get(2))) {
-				player.decreaseHealth(45);
-				obstacles.set(1, guard(650,130));
+			for(int i = 0; i < obstaclesSet2.size(); i++) {
+				if(c.obstacleCollision(player,obstaclesSet2.get(i))) {
+					player.decreaseHealth(45);
+					obstaclesSet2.set(i, trashCan(15000,15000));
+				}
+			}
+			for(int i = 0; i < obstaclesSet2.size(); i++) {
+				if(obstaclesSet2.get(i).getX() < - 315) {
+					obstaclesSet2.set(0, crate(500,130));
+					obstaclesSet2.set(1, sawblade(500,0));
+					
+				}
+			}
+			for(int i = 0; i < obstaclesSet2.size(); i++) {
+				if(c.obstacleCollision(player,obstaclesSet3.get(i))) {
+					player.decreaseHealth(45);
+					obstaclesSet3.set(i, trashCan(15000,15000));
+				}
+			}
+			for(int i = 0; i < obstaclesSet3.size(); i++) {
+				if(obstaclesSet3.get(i).getX() < - 115) {
+					obstaclesSet3.set(0, crate(1000,130));
+					obstaclesSet3.set(1, guard(1000,130));
+					
+				}
 			}
 			image(theBackground,backgroundX,backgroundY,150,200);
 			image(theBackground2,background2X,backgroundY,150,202);
-			image(theBackground3,background3X,backgroundY ,150,200);
-			backgroundX -= 3;
-			background2X -= 3;
-			background3X -= 3;
+		    image(theBackground3,background3X,backgroundY ,150,200);
+			backgroundX -= 1;
+			background2X -=1;
+			background3X -= 1;
 			if(background3X < 110 && a && d) {
 				backgroundX = 240;
 				a = false;
@@ -329,8 +429,9 @@ public class DrawingSurface extends PApplet  {
 			}
 			if(background3X < -190 && a && d == false) {
 				background3X = 238;
-				d = true;
+			d = true;
 			}
+			
 			player.draw(this);
 			text("score:" + score/5, 0,10);
 			if(glidingCondition == false) {
@@ -340,68 +441,98 @@ public class DrawingSurface extends PApplet  {
 				player.fall(1);
 			}
 			
-			obstacles.get(0).draw(this);
-			obstacles.get(0).move();
-			obstacles.get(1).draw(this);
-			obstacles.get(1).move();
-			obstacles.get(2).draw(this);
-			obstacles.get(2).move();
+			for(int i = 0; i < obstaclesSet1.size(); i++) {
+				obstaclesSet1.get(i).draw(this);
+				obstaclesSet1.get(i).move();
+			}
+			for(int i = 0; i < obstaclesSet2.size(); i++) {
+				obstaclesSet2.get(i).draw(this);
+				obstaclesSet2.get(i).move();
+			}
+			for(int i = 0; i < obstaclesSet3.size(); i++) {
+				obstaclesSet3.get(i).draw(this);
+				obstaclesSet3.get(i).move();
+			}
 			if(gunCondition) {
 				weapon.draw(this);
 				b.setStartLocation((int) player.getX() + 43, (int)(player.getY() + 10),0);
 			}
 			b.update();
 			b.draw(this);
-			if(obstacles.get(0).getX() < -50) {
-				obstacles.set(0, trashCan(350,130));
-			}
-			if(obstacles.get(1).getX() < -100) {
-				obstacles.set(1, crate(450,130));		
-			}
-			if(obstacles.get(2).getX() < -150) {
-				obstacles.set(2, guard(500,130));		
-			}
-			if(c.checkObstacleBulletCollision(b, obstacles.get(0))){
-				obstacles.get(0).subtractHealth(20,this);
-				if(obstacles.get(0).getHealth() <= 0) {
-					obstacles.set(0, trashCan(500,130));
+			
+			
+			for(int i = 0; i < obstaclesSet1.size(); i++) {
+				if(c.checkObstacleBulletCollision(b, obstaclesSet1.get(i))) {
+					obstaclesSet1.get(i).subtractHealth(20, this);
+					if(obstaclesSet1.get(i).getHealth() <= 0) {
+						obstaclesSet1.set(i, trashCan(15000,15000));
+					}
+					b.reset();
 				}
-				b.reset();
+				
 			}
-			if(c.checkObstacleBulletCollision(b, obstacles.get(1))){
-				obstacles.get(1).subtractHealth(20,this);
-				if(obstacles.get(1).getHealth() <= 0) {
-					obstacles.set(1, crate(600,130));
+			for(int i = 0; i < obstaclesSet2.size(); i++) {
+				if(c.checkObstacleBulletCollision(b, obstaclesSet2.get(i))) {
+					obstaclesSet2.get(i).subtractHealth(20, this);
+					if(obstaclesSet2.get(i).getHealth() <= 0) {
+						obstaclesSet2.set(i, trashCan(15000,15000));
+					}
+					b.reset();
 				}
-				b.reset();
+				
 			}
-			if(c.checkObstacleBulletCollision(b, obstacles.get(2))){
-				obstacles.get(2).subtractHealth(50,this);
-				if(obstacles.get(2).getHealth() <= 0) {
-					obstacles.set(2, guard(600,130));
+			for(int i = 0; i < obstaclesSet3.size(); i++) {
+				if(c.checkObstacleBulletCollision(b, obstaclesSet3.get(i))) {
+					obstaclesSet3.get(i).subtractHealth(20, this);
+					if(obstaclesSet3.get(i).getHealth() <= 0) {
+						obstaclesSet3.set(i, trashCan(15000,15000));
+					}
+					b.reset();
 				}
-				b.reset();
+				
 			}
-			if(score / 5 <= 99 ) {
-				obstacles.get(0).setDifficulty(0);
-				obstacles.get(1).setDifficulty(0);
-				score += 3;                        
+			if(score/5 % 400 == 0 && score > 6) {
+				State = STATE.Boss;
 			}
-			if(score / 5 > 99 && score / 5 <= 200 ) {                               
-				obstacles.get(0).setDifficulty(1);
-				obstacles.get(1).setDifficulty(1);
-				score += 4;
-			}
-			if(score / 5 > 200 && score / 5 <= 350 ) {
-				obstacles.get(0).setDifficulty(2);
-				obstacles.get(1).setDifficulty(2);
+	
+			else if(score/5 > 405) {
 				score += 5;
+				for(int i = 0; i < obstaclesSet1.size(); i++) {
+					obstaclesSet1.get(i).setDifficulty(3);
+				}
+				for(int i = 0; i < obstaclesSet2.size(); i++) {
+					obstaclesSet2.get(i).setDifficulty(3);
+				}
+			}
+			else if(score/5 >= 250) {
+				score += 4;
+				for(int i = 0; i < obstaclesSet1.size(); i++) {
+					obstaclesSet1.get(i).setDifficulty(2);
+				}
+				for(int i = 0; i < obstaclesSet2.size(); i++) {
+					obstaclesSet2.get(i).setDifficulty(2);
+				}
+			}
+			else if(score/5 > 150) {
+				score += 3;
+				for(int i = 0; i < obstaclesSet1.size(); i++) {
+					obstaclesSet1.get(i).setDifficulty(1);
+				}
+				for(int i = 0; i < obstaclesSet2.size(); i++) {
+					obstaclesSet2.get(i).setDifficulty(1);
+				}
+			}
+			else {
+				score += 2;
+				for(int i = 0; i < obstaclesSet1.size(); i++) {
+					obstaclesSet1.get(i).setDifficulty(0);
+				}
+				for(int i = 0; i < obstaclesSet2.size(); i++) {
+					obstaclesSet2.get(i).setDifficulty(0);
+				}
 			}
 			
-			if(score / 5 >= 475) {
-				obstacles.set(0, trashCan(500,130));
-				obstacles.set(1, crate(500,130));
-			}
+			
 			
 	}
 		if(State == STATE.Boss) {			
@@ -424,8 +555,14 @@ public class DrawingSurface extends PApplet  {
 				background3X = 238;
 				d = true;
 			}
-			image(johnsHead,190,130,10,10);
-			image(john[frameCount% john.length], (int) 160, (int) 110, (int) 30, (int) 30);
+			image(johnsHead,johnHeadX,130,10,10);
+			image(john[frameCount% john.length], (int) johnX, (int) 110, (int) 30, (int) 30);
+			if(johnHeadX > 175) {
+				johnHeadX -= 3;
+			}
+			if(johnX > 145) {
+				johnX -= 3;
+			}
 			backgroundX -= 3;
 			background2X -= 3;
 			background3X -= 3;
@@ -448,15 +585,25 @@ public class DrawingSurface extends PApplet  {
 			textSize(15);
 			fill(0,0,0);
 			fill(255,255,255);
-			spawnNewPatrolManJohn();
+			boss1 = spawnNewPatrolManJohn();
+			if(bossX > 107) {
+				bossX -= 3;
+			}
 			if(gunCondition) {
 				weapon.draw(this);
-				b.setStartLocation((int) player.getX() + 43, (int)(player.getY() + 10),0);
+				b.setStartLocation((int) player.getX() + 50, (int)(player.getY() + 10),0);
 			}
 			b.update();
 			b.draw(this);
-			if(frameCount % 50 == 0) {
+			if(frameCount % 50 == 0 && firstShot) {
 				b2.setStartLocation(160, 130, 145* PI/150);
+				playMusic("shotgun.wav");
+			}
+			
+			if(frameCount % 100 == 0 && firstShot == false) {
+				b2.setStartLocation(160, 130, 145* PI/150);
+				playMusic("shotgun.wav");
+				firstShot = true;
 			}
 			if(c.playerBulletCollision(b2, player)) {
 				player.decreaseHealth(45);
@@ -466,11 +613,11 @@ public class DrawingSurface extends PApplet  {
 				State = STATE.GameOver;
 			}
 			if(c.johnBulletCollision(b)) {
-				boss1.decreaseHealth(15);
+				boss1.decreaseHealth(5);
 				b.reset();
-				System.out.println("true");		
+					
 			}
-			if(boss1.getHealth() <= 0) {
+			if(boss1.getHealth() <= 0 && score/5 % 400 == 0) {
 				State = STATE.Winner;
 			}
 			boss1.draw(this);
